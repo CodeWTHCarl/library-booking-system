@@ -29,7 +29,8 @@ import java.util.List;
  * Every change is saved to MySQL first, then the lists are reloaded so they always match the database.
  */
 public class LibraryService {
-    private static final int MAX_DAYS_AHEAD = 30;
+    /** How many days ahead a booking may be made (the Booking tab offers exactly this many days). */
+    public static final int MAX_DAYS_AHEAD = 30;
 
     private final ClientRepository clientRepository;
     private final ResourceRepository resourceRepository;
@@ -97,6 +98,20 @@ public class LibraryService {
 
     public List<Visit> getVisits() {
         return Collections.unmodifiableList(visits);
+    }
+
+    /** Looks up a saved client by student ID. Returns null if there is none. */
+    public Client findClient(String studentId) {
+        if (studentId == null) {
+            return null;
+        }
+        String wanted = studentId.trim();
+        for (Client client : clients) {
+            if (client.getStudentId().equalsIgnoreCase(wanted)) {
+                return client;
+            }
+        }
+        return null;
     }
 
     // =====================================================================================
@@ -339,12 +354,8 @@ public class LibraryService {
             throws LibraryException {
         try {
             Client typed = new Client(fullName, studentId, contactNo); // validates the three fields
-            for (Client existing : clients) {
-                if (existing.getStudentId().equalsIgnoreCase(typed.getStudentId())) {
-                    return existing;
-                }
-            }
-            return typed;
+            Client existing = findClient(typed.getStudentId());
+            return (existing != null) ? existing : typed;
         } catch (IllegalArgumentException e) {
             throw new LibraryException(e.getMessage());
         }

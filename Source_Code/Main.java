@@ -1,14 +1,31 @@
-import model.*;
-import java.time.LocalDate;
+import service.LibraryException;
+import service.LibraryService;
+import ui.MainFrame;
 
-/** TEMPORARY setup check. This file is replaced when the Swing UI is built. */
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+
+/** Starts the application: load the records from MySQL, then open the main window. */
 public class Main {
     public static void main(String[] args) {
-        Client client = new Client("Test Client", "2024-0001", "09170000000");
-        Resource room = new StudyRoom(1, "Room A", 6, true);
-        Visit visit = new BookedReservation(1, client, room, LocalDate.now(),
-                TimeSlot.SLOT_1, "Setup check", VisitStatus.BOOKED);
-        System.out.println(visit.getDetails());
-        System.out.println("Setup OK!");
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); // native look
+        } catch (Exception ignored) {
+            // the default look is fine too
+        }
+
+        SwingUtilities.invokeLater(() -> {
+            LibraryService service = new LibraryService();
+            try {
+                service.loadAll();
+            } catch (LibraryException e) {
+                JOptionPane.showMessageDialog(null,
+                        e.getMessage() + "\n\nCheck that MySQL is running and that db.properties is correct.",
+                        "Cannot start", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            new MainFrame(service).setVisible(true);
+        });
     }
 }

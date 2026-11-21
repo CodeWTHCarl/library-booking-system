@@ -1,0 +1,12 @@
+# compiled output
+bin/
+out/
+*.class
+
+# local-only settings (each member has their own MySQL password)
+db.properties
+
+# IDE files
+.idea/
+*.iml
+.DS_Store

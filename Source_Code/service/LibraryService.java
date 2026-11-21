@@ -138,13 +138,18 @@ public class LibraryService {
 
     /** The slots of that resource on that date that can still be booked (for the slot combo box). */
     public List<TimeSlot> getOpenSlots(Resource resource, LocalDate date) {
+        return getOpenSlots(resource, date, null);
+    }
+
+    /** Overloaded: ignores one reservation, so that rescheduling can offer that booking's own slot too. */
+    public List<TimeSlot> getOpenSlots(Resource resource, LocalDate date, Visit ignore) {
         List<TimeSlot> open = new ArrayList<>();
         if (resource == null || date == null) {
             return open;
         }
         for (TimeSlot slot : TimeSlot.values()) {
             boolean alreadyOver = date.equals(today()) && slot.hasEnded(now());
-            if (!alreadyOver && !isSlotTaken(resource, date, slot, null)) {
+            if (!alreadyOver && !isSlotTaken(resource, date, slot, ignore)) {
                 open.add(slot);
             }
         }
@@ -266,6 +271,27 @@ public class LibraryService {
         }
         visit.setStatus(newStatus);
         saveChanges(visit);
+    }
+
+    // The UI asks these questions to decide which buttons to enable, so the rules stay in one place.
+
+    /** Would changeStatus accept this move? (Walk-ins are started with "Assign next", never directly.) */
+    public boolean canChangeTo(Visit visit, VisitStatus next) {
+        if (visit == null) {
+            return false;
+        }
+        if (visit instanceof WalkInTicket && next == VisitStatus.IN_USE) {
+            return false;
+        }
+        return canChangeStatus(visit.getStatus(), next);
+    }
+
+    public boolean canReschedule(Visit visit) {
+        return visit instanceof BookedReservation && visit.getStatus() == VisitStatus.BOOKED;
+    }
+
+    public boolean canDelete(Visit visit) {
+        return visit != null && visit.getStatus() != VisitStatus.IN_USE;
     }
 
     /** Changes the resource, date, slot or purpose of a reservation that has not started yet. */

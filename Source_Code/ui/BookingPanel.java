@@ -11,11 +11,9 @@ import service.LibraryException;
 import service.LibraryService;
 
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -24,7 +22,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagLayout;
@@ -97,18 +94,7 @@ public class BookingPanel extends ServicePanel {
         lblResourceInfo.setFont(lblResourceInfo.getFont().deriveFont(Font.ITALIC));
         lblSlotNote.setForeground(new java.awt.Color(180, 40, 40));
 
-        cmbDate.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
-                                                          boolean isSelected, boolean cellHasFocus) {
-                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                if (value instanceof LocalDate) {
-                    LocalDate date = (LocalDate) value;
-                    setText(DATE_FORMAT.format(date) + (date.equals(LocalDate.now()) ? "  (today)" : ""));
-                }
-                return this;
-            }
-        });
+        cmbDate.setRenderer(new DateListCellRenderer());
 
         JPanel boxes = new JPanel(new GridLayout(1, 2, 10, 0));
         boxes.add(clientBox);

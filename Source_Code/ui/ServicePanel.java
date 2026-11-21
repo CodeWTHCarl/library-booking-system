@@ -41,6 +41,18 @@ public abstract class ServicePanel extends JPanel {
                 JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
     }
 
+    /** Shows a ready-made form panel in an OK/Cancel dialog. Returns true if the user pressed OK. */
+    protected boolean showForm(JComponent form, String title) {
+        return JOptionPane.showConfirmDialog(this, form, title, JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION;
+    }
+
+    /** Asks for one line of text. Returns null if the user cancelled. */
+    protected String askText(String message, String initialValue) {
+        return (String) JOptionPane.showInputDialog(this, message, "Edit", JOptionPane.PLAIN_MESSAGE,
+                null, null, initialValue);
+    }
+
     // ---- form helpers ----
 
     /** If the typed student ID belongs to a saved client, fill in that client's name and contact number. */

@@ -29,7 +29,7 @@ public class MainFrame extends JFrame {
         JTabbedPane tabs = new JTabbedPane();
         tabs.addTab("Book a Slot", new BookingPanel(service));
         tabs.addTab("Walk-in Queue", new WalkInPanel(service));
-        // Phase 5 adds the Records tab: one more addTab line.
+        tabs.addTab("Records", new RecordsPanel(service));
 
         // Every tab is a ServicePanel, so MainFrame can refresh whichever one is opened.
         tabs.addChangeListener(e -> {

@@ -164,10 +164,9 @@ public class LibraryService {
         }
         requireText(purpose, "Purpose");
 
-        WalkInTicket existing = findWaitingTicket(client.getStudentId(), requestedType);
-        if (existing != null) {
-            throw new LibraryException(client.getFullName() + " is already in the queue as "
-                    + existing.getReference() + ".");
+        Visit active = findActiveVisit(client.getStudentId(), requestedType, null);
+        if (active != null) {
+            throw alreadyActive(active);
         }
         saveClientIfNew(client);
 
@@ -228,6 +227,11 @@ public class LibraryService {
             throw new LibraryException("No " + type + " is free right now.");
         }
         WalkInTicket ticket = queue.get(0);
+        Visit active = findActiveVisit(ticket.getClient().getStudentId(), type, ticket);
+        if (active != null) {
+            throw new LibraryException("Can't serve " + ticket.getReference() + ": "
+                    + alreadyActive(active).getMessage());
+        }
         ticket.assignResource(free.get(0)); // the model enforces "right type of resource"
         saveChanges(ticket);
         return ticket;
@@ -250,6 +254,10 @@ public class LibraryService {
         if (newStatus == VisitStatus.IN_USE) {
             if (!visit.getVisitDate().equals(today())) {
                 throw new LibraryException("A booking can only be checked in on its own date.");
+            }
+            Visit active = findActiveVisit(visit.getClient().getStudentId(), visit.getResourceType(), visit);
+            if (active != null) {
+                throw alreadyActive(active);
             }
             if (isInUseToday(visit.getResource(), visit)) {
                 throw new LibraryException(visit.getResource().getName()
@@ -468,13 +476,31 @@ public class LibraryService {
         return false;
     }
 
-    private WalkInTicket findWaitingTicket(String studentId, ResourceType type) {
-        for (WalkInTicket ticket : getWaitingQueue(type)) {
-            if (ticket.getClient().getStudentId().equalsIgnoreCase(studentId)) {
-                return ticket;
+    /**
+     * The rule "one active visit per resource type": a client may be WAITING or IN_USE for only one
+     * study room (and only one computer) at a time. Returns that active visit, or null if there is none.
+     */
+    private Visit findActiveVisit(String studentId, ResourceType type, Visit ignore) {
+        for (Visit visit : visits) {
+            boolean active = visit.getStatus() == VisitStatus.WAITING
+                    || visit.getStatus() == VisitStatus.IN_USE;
+            if (active && !isSame(visit, ignore)
+                    && visit.getResourceType() == type // polymorphism: works for both kinds of visit
+                    && visit.getVisitDate().equals(today())
+                    && visit.getClient().getStudentId().equalsIgnoreCase(studentId)) {
+                return visit;
             }
         }
         return null;
+    }
+
+    private LibraryException alreadyActive(Visit active) {
+        String name = active.getClient().getFullName();
+        if (active.getStatus() == VisitStatus.WAITING) {
+            return new LibraryException(name + " is already in the queue as " + active.getReference() + ".");
+        }
+        return new LibraryException(name + " is already using " + active.getResource().getName()
+                + ". Complete that visit first.");
     }
 
     /** The allowed moves: BOOKED -> IN_USE/CANCELLED/NO_SHOW, WAITING -> CANCELLED/NO_SHOW, IN_USE -> COMPLETED. */

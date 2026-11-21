@@ -30,6 +30,9 @@ public abstract class Visit {
     /** What identifies this visit: the time slot for a booking, the queue number for a walk-in. */
     public abstract String getReference();
 
+    /** Which kind of resource this visit is about (a study room or a computer station). */
+    public abstract ResourceType getResourceType();
+
     /** One line summary. It calls getReference(), so the output changes depending on the real object type. */
     public String getDetails() {
         String resourceName = (resource == null) ? "Not yet assigned" : resource.getName();

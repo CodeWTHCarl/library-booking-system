@@ -35,4 +35,9 @@ public class BookedReservation extends Visit {
     public String getReference() {
         return timeSlot.getLabel();
     }
+
+    @Override
+    public ResourceType getResourceType() {
+        return getResource().getResourceType(); // a reservation always has its resource
+    }
 }

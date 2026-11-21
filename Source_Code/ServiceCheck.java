@@ -70,6 +70,9 @@ public class ServiceCheck {
                     assigned.getStatus() == VisitStatus.IN_USE
                             && assigned.getResource().getResourceType() == ResourceType.COMPUTER);
 
+            expectFailure("A client who is waiting or already using a PC can't register for another",
+                    () -> service.registerWalkIn("Svc Alice", idA, "0917", ResourceType.COMPUTER, "Second PC"));
+
             System.out.println("--- Status changes, edit, delete ---");
             service.changeStatus(assigned, VisitStatus.COMPLETED);
             check("An IN_USE visit can be completed", assigned.getStatus() == VisitStatus.COMPLETED);

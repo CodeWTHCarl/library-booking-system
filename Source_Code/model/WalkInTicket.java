@@ -46,4 +46,9 @@ public class WalkInTicket extends Visit {
     public String getReference() {
         return requestedType.getPrefix() + "-" + String.format("%03d", queueNumber); // e.g. R-001
     }
+
+    @Override
+    public ResourceType getResourceType() {
+        return requestedType; // known even before a resource is assigned
+    }
 }

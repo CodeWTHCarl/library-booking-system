@@ -1,7 +1,6 @@
 package ui;
 
 import model.BookedReservation;
-import model.Client;
 import model.Resource;
 import model.ResourceType;
 import model.TimeSlot;
@@ -15,7 +14,6 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -29,10 +27,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.time.LocalDate;
@@ -139,29 +135,6 @@ public class BookingPanel extends ServicePanel {
         return scroll;
     }
 
-    private void addRow(JPanel panel, int row, String label, JComponent field) {
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(4, 8, 4, 8);
-        gbc.gridy = row;
-        gbc.anchor = GridBagConstraints.WEST;
-
-        gbc.gridx = 0;
-        panel.add(new JLabel(label), gbc);
-
-        gbc.gridx = 1;
-        gbc.weightx = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(field, gbc);
-    }
-
-    /** An empty last row that soaks up spare height, so the fields stay at the top of the box. */
-    private void addFiller(JPanel panel, int row) {
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridy = row;
-        gbc.weighty = 1;
-        panel.add(new JLabel(), gbc);
-    }
-
     // =====================================================================================
     //  EVENT HANDLING
     // =====================================================================================
@@ -190,7 +163,7 @@ public class BookingPanel extends ServicePanel {
         txtStudentId.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                autofillClient();
+                autofillClient(txtStudentId, txtFullName, txtContact);
             }
         });
     }
@@ -217,14 +190,6 @@ public class BookingPanel extends ServicePanel {
             refreshTable();
         } catch (LibraryException ex) {
             showError(ex.getMessage());
-        }
-    }
-
-    private void autofillClient() {
-        Client client = service.findClient(txtStudentId.getText());
-        if (client != null) {
-            txtFullName.setText(client.getFullName());
-            txtContact.setText(client.getContactNo());
         }
     }
 
